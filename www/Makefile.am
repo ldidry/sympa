@@ -329,13 +329,10 @@ nobase_static_DATA = \
 	icons/logo_sympa.png \
 	icons/position.png \
 	icons/sv.png \
-	js/foundation/css/foundation.css \
 	js/foundation/css/foundation-float.css \
 	js/foundation/css/foundation-float.min.css \
-	js/foundation/css/foundation.min.css \
+	js/foundation/js/foundation.js \
 	js/foundation/js/foundation.min.js \
-	js/foundation/js/vendor/foundation.js \
-	js/foundation/js/vendor/foundation.min.js \
 	js/foundation/js/vendor/what-input.js \
 	js/html5shiv/html5shiv.js \
 	js/jqplot/jqplot.barRenderer.min.js \
@@ -356,20 +353,23 @@ nobase_static_DATA = \
 	js/jquery-ui/images/ui-bg_highlight-soft_75_cccccc_1x100.png \
 	js/jquery-ui/images/ui-icons_222222_256x240.png \
 	js/jquery-ui/images/ui-icons_2e83ff_256x240.png \
+	js/jquery-ui/images/ui-icons_444444_256x240.png \
 	js/jquery-ui/images/ui-icons_454545_256x240.png \
+	js/jquery-ui/images/ui-icons_555555_256x240.png \
+	js/jquery-ui/images/ui-icons_777620_256x240.png \
+	js/jquery-ui/images/ui-icons_777777_256x240.png \
 	js/jquery-ui/images/ui-icons_888888_256x240.png \
+	js/jquery-ui/images/ui-icons_cc0000_256x240.png \
 	js/jquery-ui/images/ui-icons_cd0a0a_256x240.png \
+	js/jquery-ui/images/ui-icons_ffffff_256x240.png \
 	js/jquery-ui/jquery-ui.css \
 	js/jquery-ui/jquery-ui.js \
-	js/modernizr.custom.js \
 	js/respondjs/respond.min.js \
 	js/sympa.js
 
 EXTRA_DIST = $(nobase_static_DATA)
 
-# Use recent release of jQuery; remove one distributed with Foundation.
 install-data-hook:
-	cd $(DESTDIR)$(staticdir); \
 	@echo "Creating static_content directory"
 	-@for dir in $(staticdir); do \
 		if [ ! -d $(DESTDIR)$$dir ] ; then \
