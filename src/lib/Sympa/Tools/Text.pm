@@ -34,12 +34,16 @@ use MIME::EncWords;
 use Text::LineFold;
 use Unicode::GCString;
 use URI::Escape qw();
+use Sympa;
+use Conf;
 use if (5.008 < $] && $] < 5.016), qw(Unicode::CaseFold fc);
 use if (5.016 <= $]), qw(feature fc);
 BEGIN { eval 'use Unicode::Normalize qw()'; }
 
 use Sympa::Language;
 use Sympa::Regexps;
+
+my $domains_corrections;
 
 # Old name: tools::addrencode().
 sub addrencode {
@@ -472,6 +476,83 @@ sub weburl {
 
     return sprintf '%s%s%s', join('/', grep { defined $_ } ($base, @paths)),
         $qstring, $fstring;
+}
+
+sub domain_correction {
+    my $email = shift;
+
+    if (!$Conf::Conf{'use_domain_correction'}) {
+        return $email;
+    }
+
+    if (!defined($domains_corrections)) {
+        $domains_corrections = _get_domains_corrections();
+    }
+
+    my @parts = split '@', $email;
+
+    if (defined($domains_corrections->{substitutions}->{$parts[1]})) {
+        return $parts[0] . '@'
+            . $domains_corrections->{substitutions}->{$parts[1]};
+    } else {
+        for my $pattern (keys %{$domains_corrections->{globbing}}) {
+            my $replacement = $domains_corrections->{globbing}->{$pattern};
+            if ($parts[1] =~ m/$pattern/) {
+                return $parts[0] . '@' . $replacement;
+            }
+        }
+        return $email;
+    }
+}
+
+sub _get_domains_corrections {
+    if (!$Conf::Conf{'use_domain_correction'}) {
+        return {substitutions => {}, globbing => {}};
+    }
+
+    my $hash = do {
+        my $file = Sympa::search_fullpath('*', 'domain_correction');
+        open my $fh, '<', $file or die "Could not open $file for reading";
+        local $/;
+        eval <$fh>;
+    };
+
+    my ($substitutions, $globbing) = ({}, {});
+
+    # Transform { a => [b, c, d] } to { b => a, c => a, d => a }
+    if (defined($hash->{substitutions})) {
+        for my $domain (keys %{$hash->{substitutions}}) {
+            for my $substitution (@{$hash->{substitutions}->{$domain}}) {
+                $substitutions->{$substitution} = $domain;
+            }
+        }
+    }
+
+    # Transform shell glob patterns to regexes
+    if (defined($hash->{globbing})) {
+        for my $key (keys %{$hash->{globbing}}) {
+            my $glob = _glob2pat($key);
+            $globbing->{$glob} = $hash->{globbing}->{$key};
+        }
+    }
+
+    return {
+        substitutions => $substitutions,
+        globbing      => $globbing
+    };
+}
+
+# Comes from https://www.oreilly.com/library/view/perl-cookbook/1565922433/ch06s10.html
+sub _glob2pat {
+    my $globstr = shift;
+    my %patmap  = (
+        '*' => '.*',
+        '?' => '.',
+        '[' => '[',
+        ']' => ']',
+    );
+    $globstr =~ s{(.)} { $patmap{$1} || "\Q$1" }ge;
+    return '^' . $globstr . '$';
 }
 
 1;

@@ -1,0 +1,63 @@
+# vim:set ft=perl:
+
+=head1 Domain correction
+
+Users make common mistakes and typos on email addresses, like C<foo@gmail.fr>
+instead of C<foo@gmail.com>.
+
+You can define here some mistakes and typos that you want to automatically
+correct before using them in list subscriptions.
+
+To use that feature, set C<use_domain_correction> to 1 in C<sympa.conf>, copy
+this file in Sympa's C<etc> directory then modify that copy.
+
+Please note that this feature can only be use to correct the domains of the
+email addresses, you can't change the user part of the email address.
+
+=head2 Configuration
+
+This file contains a Perl hash table containing two keys. Any other keys that
+you could add won't be used, but you can delete one if you don't need it.
+
+=over 1
+
+=item B<substitutions>
+
+Its value is a hash table, which keys will be the correct domains and the
+values will be an array of mistyped domains.
+
+Example:
+
+    substitutions => {
+        'hotmail.com' => ['hotamil.com', 'htmail.com']
+    },
+
+In this example, C<foo@hotamil.com> will be corrected in C<foo@hotmail.com>
+
+=item B<globbing>
+
+Its value is a hash table, which keys will be a mistyped domain pattern and
+the values will be the correct domains.
+
+B<Warning>: the pattern is not a regex, it's similar to shell globbing.
+C<gmail.*> would match C<gmail.fr> but not C<gmailbar.fr>
+See
+https://www.oreilly.com/library/view/perl-cookbook/1565922433/ch06s10.html
+
+Example:
+
+    globbing => {
+        'gmail.*' => 'gmail.com',
+    }
+
+In this example, C<foo@gmail.fr> and C<bar@gmail.de> will be corrected in
+C<foo@gmail.com> and C<bar@gmail.com>
+
+=back
+
+=cut
+
+{
+    substitutions => { },
+    globbing => { }
+};

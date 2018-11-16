@@ -3821,6 +3821,7 @@ sub add_list_member {
 
     foreach my $new_user (@new_users) {
         my $who = Sympa::Tools::Text::canonic_email($new_user->{'email'});
+        $who = Sympa::Tools::Text::domain_correction($who);
         unless (defined $who) {
             $log->syslog('err', 'Ignoring %s which is not a valid email',
                 $new_user->{'email'});

@@ -2291,7 +2291,7 @@ sub _store_source_file_name {
     $param->{'config_hash'}{'source_file'} = $param->{'config_file'};
 }
 
-# FXIME:Use Sympa::search_fullpath().
+# FIXME:Use Sympa::search_fullpath().
 sub _get_config_file_name {
     my $param = shift;
     my $config_file;

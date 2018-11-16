@@ -63,6 +63,7 @@ sub _twist {
 
     $language->set_lang($list->{'admin'}{'lang'});
 
+    $email = Sympa::Tools::Text::domain_correction($email);
     unless (Sympa::Tools::Text::valid_email($email)) {
         $self->add_stash($request, 'user', 'incorrect_email',
             {'email' => $email});

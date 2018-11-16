@@ -2132,6 +2132,13 @@ our @params = (
         'file'     => 'sympa.conf',
         'optional' => 1,
     },
+    {   'name'            => 'use_domain_correction',
+        'default'         => '0',
+        'gettext_id'      => 'Enable domain correction',
+        'gettext_comment' => 'See default/domain_correction file for details',
+        'file'            => 'sympa.conf',
+        'optional'        => 1,
+    },
 
 ## Not implemented yet.
 ##    {

@@ -30,6 +30,7 @@ nobase_default_DATA = \
 	charset.conf \
 	crawlers_detection.conf \
 	create_list.conf \
+	domain_correction \
 	edit_list.conf \
 	ldap_alias_entry.tt2 \
 	mhonarc-ressources.tt2 \

@@ -72,6 +72,8 @@ sub _twist {
         undef $comment;
     }
 
+    $email = Sympa::Tools::Text::domain_correction($email);
+
     # Unless rejected by scenario, don't go further if the user is subscribed
     # already.
     my $user_entry = $list->get_list_member($email);
