@@ -80,6 +80,32 @@
                 </fieldset>
             </form>
         [%~ END ~%]
+        <form name="apply_template_to_list" action="[% path_cgi %]" method="post">
+            <fieldset>
+                [%|loc%]Apply a template to the configuration of your list [%END%]
+                <input type="hidden" name="list" value="[% list %]"/>
+                <label for="template">[%|loc%]Template:[%END%]</label>
+                <select id="template" name="template">
+                    [%~ FOREACH tpl_info = list_list_tpl %]
+                        <option value="[% tpl_info.key %]"
+                                title="[%~ IF tpl_info.value.html_content ~%]
+                                    [% TRY ~%]
+                                        [% tpl_info.value.html_content | eval %]
+                                    [%~ CATCH ~%]
+                                        <!-- [% error | html %] -->
+                                    [%~ END %]
+                                [%~ END %]">
+                            [% IF tpl_info.value.title ~%]
+                                [% tpl_info.value.title %]
+                            [%~ ELSE ~%]
+                                [% tpl_info.key %]
+                            [%~ END %]
+                        </option>
+                    [%~ END %]
+                </select>
+            </fieldset>
+            <input class="MainMenuLinks" type="submit" name="action_apply_template_to_list" value="[%|loc%]Apply template[%END%]"/>
+        </form>
     [% END %]
 
     [% IF is_shared_allowed && (is_listmaster || is_owner) %]

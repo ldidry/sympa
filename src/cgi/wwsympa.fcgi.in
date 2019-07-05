@@ -236,6 +236,7 @@ our %comm = (
     'edit_list'                => 'do_edit_list',
     'create_list_request'      => 'do_create_list_request',
     'create_list'              => 'do_create_list',
+    'apply_template_to_list'   => 'do_apply_template_to_list',
     'get_pending_lists'        => 'do_get_pending_lists',
     'get_closed_lists'         => 'do_get_closed_lists',
     'get_latest_lists'         => 'do_get_latest_lists',
@@ -489,7 +490,7 @@ our %action_args = (
 );
 
 ## Define the required parameters for each action
-## Parameter names refer to the %in structure of to $param if mentionned as
+## Parameter names refer to the %in structure or to $param if mentionned as
 ## 'param.x'
 ## This structure is used to determine if any parameter is missing
 ## The list of parameters is not ordered
@@ -499,23 +500,24 @@ our %action_args = (
 ## Limit: it does not allow to have a specific error message and redirect to a
 ## given page if the parameter is missing
 our %required_args = (
-    'active_lists'   => ['for|count'],
-    'admin'          => ['param.list', 'param.user.email'],
-    'add'            => ['param.list', 'param.user.email'],
-    'import'         => ['param.list', 'param.user.email'],
-    'arc'            => ['param.list'],
-    'arc_delete'     => ['param.user.email', 'param.list'],
-    'arc_download'   => ['param.user.email', 'param.list'],
-    'arc_manage'     => ['param.list'],
-    'arcsearch'      => ['param.list'],
-    'arcsearch_form' => ['param.list'],
-    'arcsearch_id'   => ['param.list'],
-    'auth'           => ['id', 'heldaction', 'email'],
-    'auth_add'       => ['param.list', 'param.user.email', 'id'],
-    'auth_del'       => ['param.list', 'param.user.email', 'id'],
-    'auto_signoff'   => ['param.list', 'email'],
-    'attach'         => ['param.list'],
-    'blacklist'      => ['param.list'],
+    'active_lists'           => ['for|count'],
+    'admin'                  => ['param.list', 'param.user.email'],
+    'add'                    => ['param.list', 'param.user.email'],
+    'import'                 => ['param.list', 'param.user.email'],
+    'apply_template_to_list' => ['param.list', 'param.user.email', 'template'],
+    'arc'                    => ['param.list'],
+    'arc_delete'             => ['param.user.email', 'param.list'],
+    'arc_download'           => ['param.user.email', 'param.list'],
+    'arc_manage'             => ['param.list'],
+    'arcsearch'              => ['param.list'],
+    'arcsearch_form'         => ['param.list'],
+    'arcsearch_id'           => ['param.list'],
+    'auth'                   => ['id', 'heldaction', 'email'],
+    'auth_add'               => ['param.list', 'param.user.email', 'id'],
+    'auth_del'               => ['param.list', 'param.user.email', 'id'],
+    'auto_signoff'           => ['param.list', 'email'],
+    'attach'                 => ['param.list'],
+    'blacklist'              => ['param.list'],
     'move_user' =>
         ['param.user.email', 'current_email|old_email', 'email|new_email'],
     'close_list'    => ['param.user.email', 'param.list'],
@@ -646,6 +648,7 @@ our %required_args = (
 ## You can define a set ofequiivalent privileges in the ARRAYREF
 our %required_privileges = (
     'admin'                    => ['owner', 'editor'],
+    'apply_template_to_list'   => ['owner', 'listmaster'],
     'arc_delete'               => ['owner'],
     'arc_download'             => ['owner'],
     'arc_manage'               => ['owner'],
@@ -6009,6 +6012,13 @@ sub do_setpasswd {
 sub do_admin {
     wwslog('info', '');
 
+    unless ($param->{'list_list_tpl'} =
+        Sympa::WWW::Tools::get_list_list_tpl($robot)) {
+        Sympa::WWW::Report::reject_report_web('intern',
+            'unable_to_load_create_list_templates',
+            {}, $param->{'action'}, '', $param->{'user'}{'email'}, $robot);
+    }
+
     return 1;
 }
 
@@ -9806,6 +9816,48 @@ sub do_create_list {
         Sympa::get_url($list, 'admin', nomenu => $param->{'nomenu'});
 
     return 1;
+}
+
+sub do_apply_template_to_list {
+    wwslog(
+        'info', '%s wants to apply template %s to list %s)',
+        $param->{'user'}{'email'},
+        $in{'template'},
+        $param->{'list'}
+    );
+
+    # Access control is done by %required_privileges
+
+    # Action confirmed?
+    #my $next_action = $session->confirm_action(
+    #    $in{'action'}, $in{'response_action'},
+    #    arg             => $in{'template'},
+    #    previous_action => 'admin'
+    #);
+    #return $next_action unless $next_action eq '1';
+
+    my $processed = 0;
+    my $spindle   = Sympa::Spindle::ProcessRequest->new(
+        context          => $robot,
+        listname         => $list,
+        action           => 'apply_template_to_list',
+        email            => $param->{'user'}{'email'},
+        sender           => $param->{'user'}{'email'},
+        md5_check        => 1,
+        parameters => {
+            template         => $in{'template'},
+        },
+        scenario_context => {
+            email       => $param->{'user'}{'email'},
+            sender      => $param->{'user'}{'email'},
+            remote_host => $param->{'remote_host'},
+            remote_addr => $param->{'remote_addr'}
+        },
+    );
+    $spindle and $processed += $spindle->spin;
+    unless ($processed) {
+        return $in{'previous_action'} || 'admin';
+    }
 }
 
 #=head2 sub do_create_list_request

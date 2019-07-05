@@ -190,6 +190,7 @@ nobase_default_DATA = \
 	web_tt2/active_lists.tt2 \
 	web_tt2/admin.tt2 \
 	web_tt2/ajax.tt2 \
+	web_tt2/apply_template.tt2 \
 	web_tt2/arc_manage.tt2 \
 	web_tt2/arcsearch_form.tt2 \
 	web_tt2/arcsearch.tt2 \

@@ -1,0 +1,8 @@
+<!-- apply_template.tt2 -->
+<h3>[%|loc%]Apply a template to the configuration of your list [%END%]
+    <a class="openInNewWindow" target="wws_help"
+       href="[% 'nomenu/help' | url_rel(['admin-editlist-apply_template.html']) %]">
+        <i class="fa fa-info-circle" title="[%|loc%]Help[%END%]" aria-hidden="true"></i>
+    </a>
+</h3>
+<!-- end of apply_template.tt2 -->
